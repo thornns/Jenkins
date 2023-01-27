@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        registry = ""
+        registryCredential = ''
+    }
+    
+    stages{
+        stage('Initial setup') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Setup') {
+            steps {
+                script {
+                    properties(
+                        [pipelineTriggers(
+                            [
+                                pollSCM('H * * * *') // Once an hour
+                            ]
+                            )
+                        ]
+                    )
+                }
+
+                dir('jenkins-todo-list') {
+                    git branch: "main",
+                    url: "ssh://git@github.com/XPTO/XPTO.git",
+                    credentialsId: "github-ssh"
+                }
+            }
+        }
+        stage('hadolint Dockerfile') {
+            steps {
+                dir('jenkins-todo-list') {
+                    sh '''
+                        docker run --rm -i hadolint/hadolint < Dockerfile
+                    '''
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                dir('jenkins-todo-list'){
+                    script {
+                        docker.build registry + ":$BUILD_NUMBER"
+                    }
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push()
+                    }
+                }
+            }
+        }
+        stage('Remove Unused docker image') {
+            steps{
+                sh "docker rmi $registry:$BUILD_NUMBER"
+            }
+        }
+    }
+}
