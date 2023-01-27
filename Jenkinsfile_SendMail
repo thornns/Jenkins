@@ -1,0 +1,47 @@
+// Globals
+def ENV=JOB_NAME.split("/")[2]
+def PROJECT=JOB_NAME.split("/")[0]
+
+pipeline {
+  environment {
+    // Environment Variables needed to connect with OpenStack
+  }
+
+  parameters {
+    string(name: 'BRANCH', defaultValue: '', description: 'Select IaC branch')
+    string(name: 'EMAIL', defaultValue: '', description: 'Enter the destinations email split by comma')
+  }
+
+  agent {label "master"}
+
+  triggers {
+    cron('@weekly')
+  }
+
+  stages{
+        stage('Initial setup') {
+          steps {
+            cleanWs()
+            dir('') {
+                git branch: "${params.BRANCH}",
+                  url: ""
+            }
+            script {
+                env.ENV="${ENV}"
+                env.PROJECT="${PROJECT}"
+            }
+          }
+        }
+        stage('Send Mail') {
+            steps {
+                  sh '''
+                    set +x
+                    echo "<html><body><hr>" > result
+                    echo "<h2>Openstack Status: $PROJECT - $ENV</h2>" >> result
+                    echo "</tbody></table><hr></body></html>" >> result
+                  '''
+                  emailext from: "", to: "${EMAIL}", subject: "Openstack Status: ${PROJECT.toUpperCase()} - ${ENV.toUpperCase()}", mimeType: 'text/html', body: readFile('result')
+            }
+        }
+    }
+}
