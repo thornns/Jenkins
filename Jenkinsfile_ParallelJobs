@@ -1,0 +1,115 @@
+pipeline {
+    agent  {
+        label 'master'
+    }
+
+    tools {
+        maven 'default'
+    }
+
+    parameters {
+        choice(name: "project", choices: ['proj1', 'proj2'])
+        choice(name: "environment", choices: ['dev', 'test', 'production'])
+    }
+
+    stages {
+        stage('Deploy Frontend') {
+            parallel {
+                stage('Deploy ') {
+                    when {
+                        expression { params. != '' }
+                    }
+                    steps {
+                        build job: "job/name/inside/jenkins",
+                                parameters: [
+                                        string(name: 'branch', value: "${params.}"),
+                                        string(name: 'project', value: "${params.project}"),
+                                        string(name: 'environment', value: "${params.environment}")
+                                ]
+                    }
+                }
+                stage('Deploy ') {
+                    when {
+                        expression { params. != '' }
+                    }
+                    steps {
+                        build job: "job/name/inside/jenkins",
+                                parameters: [
+                                        string(name: 'branch', value: "${params.}"),
+                                        string(name: 'project', value: "${params.project}"),
+                                        string(name: 'environment', value: "${params.environment}")
+                                ]
+                    }
+                }
+            }
+        }
+        stage('Deploy Backend') {
+            parallel {
+                stage('Deploy ') {
+                    when {
+                        expression { params. != '' }
+                    }
+                    steps {
+                        build job: "job/name/inside/jenkins",
+                                parameters: [
+                                        string(name: 'project', value: "${params.project}"),
+                                        string(name: 'environment', value: "${params.environment}")
+                                ]
+                    }
+                }
+                stage('Deploy ') {
+                    when {
+                        expression { params. != '' }
+                    }
+                    steps {
+                        build job: "job/name/inside/jenkins",
+                                parameters: [
+                                        string(name: 'project', value: "${params.project}"),
+                                        string(name: 'environment', value: "${params.environment}")
+                                ]
+                    }
+                }
+            }
+        }
+        stage('Deploy ') {
+            parallel {
+                stage('Deploy ') {
+                    when {
+                        expression { params. != '' }
+                    }
+                    steps {
+                        build job: "job/name/inside/jenkins",
+                                parameters: [
+                                        string(name: 'project', value: "${params.project}"),
+                                        string(name: 'environment', value: "${params.environment}")
+                                ]
+                    }
+                }
+                stage('Deploy ') {
+                    when {
+                        expression { params. != '' }
+                    }
+                    steps {
+                        build job: "job/name/inside/jenkins",
+                                parameters: [
+                                        string(name: 'project', value: "${params.project}"),
+                                        string(name: 'environment', value: "${params.environment}")
+                                ]
+                    }
+                }
+                stage('Deploy ') {
+                    when {
+                        expression { params. != '' }
+                    }
+                    steps {
+                        build job: "job/name/inside/jenkins",
+                                parameters: [
+                                        string(name: 'project', value: "${params.project}"),
+                                        string(name: 'environment', value: "${params.environment}")
+                                ]
+                    }
+                }
+            }
+        }
+    }
+}
